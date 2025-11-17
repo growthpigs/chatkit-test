@@ -6,16 +6,28 @@ import { ChatKit, useChatKit } from '@openai/chatkit-react';
 export default function TestPage() {
   const [ready, setReady] = useState(false);
   const [secret, setSecret] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const { control } = useChatKit({
     api: {
       async getClientSecret() {
-        const res = await fetch('/api/chatkit/session', {
-          method: 'POST'
-        });
-        const { client_secret } = await res.json();
-        setSecret(client_secret.substring(0, 20) + '...');
-        return client_secret;
+        try {
+          const res = await fetch('/api/chatkit/session', {
+            method: 'POST'
+          });
+
+          if (!res.ok) {
+            const errorData = await res.json();
+            throw new Error(errorData.error || 'Failed to create session');
+          }
+
+          const { client_secret } = await res.json();
+          setSecret(client_secret.substring(0, 20) + '...');
+          return client_secret;
+        } catch (err: any) {
+          setError(err.message || 'Failed to initialize ChatKit');
+          throw err;
+        }
       }
     },
     workflowId: process.env.NEXT_PUBLIC_TOPIC_GEN_WORKFLOW_ID || ''
@@ -32,6 +44,14 @@ export default function TestPage() {
           ChatKit + Agent Builder Test
         </h1>
 
+        {error && (
+          <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded">
+            <p className="text-sm text-red-800">
+              <strong>❌ Error:</strong> {error}
+            </p>
+          </div>
+        )}
+
         <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded">
           <p className="text-sm">
             <strong>Status:</strong> {ready ? '✅ Ready' : '⏳ Initializing...'}
@@ -45,11 +65,19 @@ export default function TestPage() {
         </div>
 
         <div className="bg-white rounded-lg shadow-lg h-[600px]">
-          {control && (
+          {error ? (
+            <div className="flex h-full items-center justify-center text-red-600">
+              <p>Failed to load ChatKit. Check console for details.</p>
+            </div>
+          ) : control ? (
             <ChatKit
               control={control}
               className="h-full"
             />
+          ) : (
+            <div className="flex h-full items-center justify-center text-gray-500">
+              <p>Loading ChatKit...</p>
+            </div>
           )}
         </div>
 
