@@ -29,8 +29,7 @@ export default function TestPage() {
           throw err;
         }
       }
-    },
-    workflowId: process.env.NEXT_PUBLIC_TOPIC_GEN_WORKFLOW_ID || ''
+    }
   });
 
   useEffect(() => {
