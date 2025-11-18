@@ -100,8 +100,8 @@ export default function TestPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-4">
-      {/* 80% scale container */}
-      <div className="max-w-5xl mx-auto" style={{ transform: 'scale(0.8)', transformOrigin: 'top center' }}>
+      {/* 90% scale container */}
+      <div className="max-w-5xl mx-auto" style={{ transform: 'scale(0.9)', transformOrigin: 'top center' }}>
         <h1 className="text-2xl font-bold mb-1">
           ChatKit + Agent Builder Test
         </h1>
