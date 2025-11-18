@@ -19,6 +19,28 @@ export async function POST() {
 
     const data = await response.json();
 
+    // Check if OpenAI API call failed
+    if (!response.ok) {
+      console.error('[SESSION] OpenAI API error:', {
+        status: response.status,
+        statusText: response.statusText,
+        error: data
+      });
+      return NextResponse.json(
+        { error: data.error?.message || `OpenAI API error: ${response.status}` },
+        { status: response.status }
+      );
+    }
+
+    // Check if client_secret exists in response
+    if (!data.client_secret) {
+      console.error('[SESSION] No client_secret in response:', data);
+      return NextResponse.json(
+        { error: 'No client_secret returned from OpenAI' },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json({
       client_secret: data.client_secret
     });
