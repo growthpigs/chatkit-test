@@ -1,7 +1,18 @@
 import { NextResponse } from 'next/server';
 
-export async function POST() {
+export async function POST(request: Request) {
   try {
+    // Get workflow ID from request body, fallback to env var
+    const body = await request.json().catch(() => ({}));
+    const workflowId = body.workflowId || process.env.NEXT_PUBLIC_TOPIC_GEN_WORKFLOW_ID;
+
+    if (!workflowId) {
+      return NextResponse.json(
+        { error: 'No workflow ID provided' },
+        { status: 400 }
+      );
+    }
+
     const response = await fetch('https://api.openai.com/v1/chatkit/sessions', {
       method: 'POST',
       headers: {
@@ -11,7 +22,7 @@ export async function POST() {
       },
       body: JSON.stringify({
         workflow: {
-          id: process.env.NEXT_PUBLIC_TOPIC_GEN_WORKFLOW_ID
+          id: workflowId
         },
         user: `user-${Date.now()}`
       })
